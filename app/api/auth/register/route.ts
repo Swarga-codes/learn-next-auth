@@ -1,12 +1,13 @@
 import USER from "@/app/models/userSchema";
-import React from 'react'
+import * as React from 'react'
 import connectDb from "@/app/util/connectDb";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from 'bcrypt';
 import { resend } from "@/app/util/sendEmailConfig";
 import { EmailTemplate } from "@/app/Components/EmailTemplate";
+
+
 export async function POST(req:NextRequest){
     try{
         await connectDb();
@@ -39,6 +40,11 @@ can use this username
 const isExistingUser= await USER.findOne({email})
 const hashPassword=await bcrypt.hash(password,10);
 const verifyOtp=Math.floor(100000+Math.random()*900000);
+const mailContent=`
+<h1>Welcome, ${username}!</h1>
+<p>Please verify your account using this given OTP <b>${verifyOtp}</b></p>
+<p>Note: This otp is valid only for an hour. Only verified users will be able to login.</p>
+`
 if(isExistingUser){
     if(isExistingUser.isVerified){
         return NextResponse.json({message:'User with the following details already exists!'},{status:409})
@@ -53,7 +59,8 @@ if(isExistingUser){
             from :'My App <onboarding@resend.dev>',
             to:[email],
             subject:'Verify Your Email | My App',
-            react:EmailTemplate({username,verifyOtp}) as React.ReactElement
+            react:mailContent,
+        
         });
         console.log("Data:",data)
         return NextResponse.json({message:'User registered successfully, please verify the email!'},{status:200})
@@ -73,7 +80,8 @@ const data=await resend.emails.send({
     from :'My App <onboarding@resend.dev>',
     to:[email],
     subject:'Verify Your Email | My App',
-    react:EmailTemplate({username,verifyOtp})
+    react:mailContent,
+
 });
 console.log("Data:",data)
 return NextResponse.json({message:'User registered successfully, please verify the email'},{status:200})
