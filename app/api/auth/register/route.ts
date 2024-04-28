@@ -4,7 +4,7 @@ import connectDb from "@/app/util/connectDb";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from 'bcrypt';
-import { resend } from "@/app/util/sendEmailConfig";
+import { transporter } from "@/app/util/sendEmailConfig";
 import { EmailTemplate } from "@/app/Components/EmailTemplate";
 
 
@@ -55,14 +55,16 @@ if(isExistingUser){
         isExistingUser.verifyOtp=verifyOtp
         isExistingUser.verifyOtpExpiry=new Date(Date.now()+36000000)
         await isExistingUser.save();
-        const data=await resend.emails.send({
-            from :'My App <onboarding@resend.dev>',
-            to:[email],
-            subject:'Verify Your Email | My App',
-            react:mailContent,
-        
-        });
-        console.log("Data:",data)
+       
+        const info = await transporter.sendMail({
+            from: '<myapp@gmail.com>', 
+            to: [email], 
+            subject: "My Auth App || Verify Email",
+            
+            html: `<p>Please verify your account using this OTP </p> <b>${verifyOtp}</b>
+            <p>Note: This OTP is valid only for an hour!</p>
+            `, 
+          });
         return NextResponse.json({message:'User registered successfully, please verify the email!'},{status:200})
     }
 }
@@ -76,17 +78,20 @@ const newUser=new USER({
 
 await newUser.save();
 
-const data=await resend.emails.send({
-    from :'My App <onboarding@resend.dev>',
-    to:[email],
-    subject:'Verify Your Email | My App',
-    react:mailContent,
-
-});
-console.log("Data:",data)
+const info = await transporter.sendMail({
+    from: '<myapp@gmail.com>', 
+    to: [email],
+    subject: "My Auth App || Verify Email",
+    
+    html: `<p>Please verify your account using this OTP </p> <b>${verifyOtp}</b>
+    <p>Note: This OTP is valid only for an hour!</p>
+    `, 
+  });
 return NextResponse.json({message:'User registered successfully, please verify the email'},{status:200})
     }
     catch(err){
+        console.log(err);
+        
         return NextResponse.json({message:'Could not register user, try again!'},{status:500})
     }
 }
