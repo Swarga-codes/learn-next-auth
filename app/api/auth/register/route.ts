@@ -14,9 +14,9 @@ export async function POST(req:NextRequest){
 const {username,email,password}=await req.json()
 const passwordRegex=/^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$%^&+=!])(?!.*\s).{8,}$/
 const mySchema=z.object({
-    username:z.string().min(4, {message:'Must be 4 characters or long!'}),
-    email:z.string().email({message:'Must be an email!'}),
-    password:z.string().min(8,{message:'Must be atleast 8 characters long!'}).regex(passwordRegex,{message:'Password should have atleast one lowercase, uppercase, number and special characters!'})
+    username:z.string().min(4, {success:false,message:'Must be 4 characters or long!'}),
+    email:z.string().email({success:false,message:'Must be an email!'}),
+    password:z.string().min(8,{success:false,message:'Must be atleast 8 characters long!'}).regex(passwordRegex,{success:false,message:'Password should have atleast one lowercase, uppercase, number and special characters!'})
 })
 const validation=mySchema.safeParse({username,email,password})
 if(!validation.success){
@@ -47,7 +47,7 @@ const mailContent=`
 `
 if(isExistingUser){
     if(isExistingUser.isVerified){
-        return NextResponse.json({message:'User with the following details already exists!'},{status:409})
+        return NextResponse.json({success:false,message:'User with the following details already exists!'},{status:409})
     }
     else{
         isExistingUser.username=username
@@ -65,7 +65,7 @@ if(isExistingUser){
             <p>Note: This OTP is valid only for an hour!</p>
             `, 
           });
-        return NextResponse.json({message:'User registered successfully, please verify the email!'},{status:200})
+        return NextResponse.json({success:true,message:'User registered successfully, please verify the email!'},{status:200})
     }
 }
 const newUser=new USER({
@@ -87,11 +87,11 @@ const info = await transporter.sendMail({
     <p>Note: This OTP is valid only for an hour!</p>
     `, 
   });
-return NextResponse.json({message:'User registered successfully, please verify the email'},{status:200})
+return NextResponse.json({success:true,message:'User registered successfully, please verify the email'},{status:200})
     }
     catch(err){
         console.log(err);
         
-        return NextResponse.json({message:'Could not register user, try again!'},{status:500})
+        return NextResponse.json({success:false,message:'Could not register user, try again!'},{status:500})
     }
 }
