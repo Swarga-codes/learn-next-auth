@@ -1,10 +1,15 @@
 import USER from "@/app/models/userSchema";
 import connectDb from "@/app/util/connectDb";
 import { NextRequest, NextResponse } from "next/server";
-import jsonwebtoken from 'jsonwebtoken'
+import { decode } from "next-auth/jwt";
 export async function PUT(req:NextRequest){
     try{
-
+const token=req.cookies.get('token')
+if(!token) return NextResponse.json({success:false,message:'Unauthorized, please register to regenerate otp!'},{status:403})
+const decodedToken=await decode({
+    token:token || "",secret:process.env.SECRET_KEY || ""
+})
+const email=decodedToken?.email
 const {otp}=await req.json()
 await connectDb();
 if(!otp || !email) return NextResponse.json({success:false,message:'One or more fields are missing!'},{status:422})
