@@ -6,7 +6,7 @@ import { z } from "zod";
 import bcrypt from 'bcrypt';
 import { transporter } from "@/app/util/sendEmailConfig";
 import { EmailTemplate } from "@/app/Components/EmailTemplate";
-
+import jsonwebtoken from 'jsonwebtoken';
 
 export async function POST(req:NextRequest){
     try{
@@ -36,7 +36,8 @@ can use this username
 
  
 */
-
+const existingUserName=await USER.findOne({username:username})
+if(existingUserName.email!==email && existingUserName.isVerified) return NextResponse.json({success:false, message:'An existing verified user with the same username exists'},{status:409})
 const isExistingUser= await USER.findOne({email})
 const hashPassword=await bcrypt.hash(password,10);
 const verifyOtp=Math.floor(100000+Math.random()*900000);
@@ -65,7 +66,10 @@ if(isExistingUser){
             <p>Note: This OTP is valid only for an hour!</p>
             `, 
           });
-        return NextResponse.json({success:true,message:'User registered successfully, please verify the email!'},{status:200})
+          const response = NextResponse.json({success:true,message:'User registered successfully, please verify the email'},{status:200})
+          const token=jsonwebtoken.sign({email,username},process.env.SECRET_KEY)
+          response.cookies.set('token',token)
+          return response
     }
 }
 const newUser=new USER({
@@ -87,7 +91,10 @@ const info = await transporter.sendMail({
     <p>Note: This OTP is valid only for an hour!</p>
     `, 
   });
-return NextResponse.json({success:true,message:'User registered successfully, please verify the email'},{status:200})
+const response = NextResponse.json({success:true,message:'User registered successfully, please verify the email'},{status:200})
+const token=jsonwebtoken.sign({email,username},process.env.SECRET_KEY)
+response.cookies.set('token',token)
+return response
     }
     catch(err){
         console.log(err);

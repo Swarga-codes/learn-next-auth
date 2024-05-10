@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import jsonwebtoken from 'jsonwebtoken'
 export async function PUT(req:NextRequest){
     try{
-const {otp,email}=await req.json()
+
+const {otp}=await req.json()
 await connectDb();
 if(!otp || !email) return NextResponse.json({success:false,message:'One or more fields are missing!'},{status:422})
 const existingUser=await USER.findOne({email:email})
@@ -19,10 +20,9 @@ const timeDifference:number=Math.ceil((currentTime-expiryTime)/(1000*60*60))
 if(timeDifference>1) return NextResponse.json({success:false,message:'Otp has expired please register again to generate another OTP!'},{status:403})
 existingUser.isVerified=true
 await existingUser.save();
-const response=NextResponse.json({success:true,message:'User verified successfully!',email:existingUser.email,username:existingUser.username},{status:200})
-const token=jsonwebtoken.sign({email:existingUser.email,username:existingUser.username},process.env.SECRET_KEY)
-response.cookies.set('token',token)
-return response
+return NextResponse.json({success:true,message:'User verified successfully!',email:existingUser.email,username:existingUser.username},{status:200})
+
+
     }
     catch(err){
         console.log(err)
