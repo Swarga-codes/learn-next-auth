@@ -1,9 +1,34 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { ArrowRight,KeyRound } from 'lucide-react'
 import Link from 'next/link'
-
+import toast from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
 export default function Page() {
+  const router=useRouter()
+  const[email,setEmail]=useState('')
+  const[password,setPassword]=useState('')
+  const [loading,setLoading]=useState(false)
+  async function loginUser(){
+    const response=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        email,password
+      })
+    })
+    const data=await response.json()
+    if(data.success){
+      toast.success(data.message)
+      router.push('/')
+    }
+    else{
+      toast.error(data.message)
+    }
+    setLoading(false)
+  } 
   return (
     <section>
       <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
@@ -24,7 +49,11 @@ export default function Page() {
               Create a free account
             </Link>
           </p>
-          <form action="#" method="POST" className="mt-8">
+          <form className="mt-8" onSubmit={(e)=>{
+            e.preventDefault()
+            setLoading(true)
+            loginUser()
+          }}>
             <div className="space-y-5">
               <div>
                 <label htmlFor="" className="text-base font-medium text-white">
@@ -36,6 +65,8 @@ export default function Page() {
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                     type="email"
                     placeholder="Email"
+                    value={email}
+                    onChange={(e)=>setEmail(e.target.value)}
                   ></input>
                 </div>
               </div>
@@ -55,16 +86,26 @@ export default function Page() {
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                     type="password"
                     placeholder="Password"
+                    value={password}
+                    onChange={(e)=>setPassword(e.target.value)}
                   ></input>
                 </div>
               </div>
               <div>
-                <button
+               {!loading? <button
                   type="submit"
                   className="inline-flex w-full items-center justify-center rounded-md bg-white px-3.5 py-2.5 font-semibold leading-7 text-black"
                 >
                   Login <ArrowRight className="ml-2" size={16} />
                 </button>
+                :
+                <button
+                type="button"
+                className="inline-flex w-full items-center justify-center rounded-md bg-white px-3.5 py-2.5 font-semibold leading-7 text-black"
+              >
+                Logging in...
+              </button> 
+                }
               </div>
             </div>
           </form>
