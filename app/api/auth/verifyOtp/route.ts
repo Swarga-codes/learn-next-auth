@@ -1,23 +1,25 @@
 import USER from "@/app/models/userSchema";
 import connectDb from "@/app/util/connectDb";
 import { NextRequest, NextResponse } from "next/server";
-import { decode } from "next-auth/jwt";
+import jsonwebtoken from 'jsonwebtoken';
 export async function PUT(req:NextRequest){
     try{
-const token=req.cookies.get('token')
+const token=req.cookies.get('token')?.value || ""
 if(!token) return NextResponse.json({success:false,message:'Unauthorized, please register to regenerate otp!'},{status:403})
-const decodedToken=await decode({
-    token:token || "",secret:process.env.SECRET_KEY || ""
-})
+    
+const decodedToken=await jsonwebtoken.verify(
+    token,process.env.SECRET_KEY
+)
+
 const email=decodedToken?.email
 const {otp}=await req.json()
+
 await connectDb();
 if(!otp || !email) return NextResponse.json({success:false,message:'One or more fields are missing!'},{status:422})
 const existingUser=await USER.findOne({email:email})
 if(!existingUser) return NextResponse.json({success:false,message:'User not found!'},{status:404})
 if(existingUser.isVerified) return NextResponse.json({success:false,message:'User is already verified, please login!'},{status:409})
 //whether the otp is same or not
-
 if(existingUser.verifyOtp!==otp) return NextResponse.json({success:false,message:'Otp did not match, try again!'}) 
 const currentTime:Date=new Date()
 const expiryTime:Date=new Date(existingUser.verifyOtpExpiry)
