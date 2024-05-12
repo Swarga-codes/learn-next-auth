@@ -76,10 +76,10 @@ export default function Page() {
                     {' '}
                     Password{' '}
                   </label>
-                  <a href="#" title="" className="text-sm font-semibold text-white hover:underline">
+                  <Link href="/forgotPassword" title="" className="text-sm font-semibold text-white hover:underline">
                     {' '}
                     Forgot password?{' '}
-                  </a>
+                  </Link>
                 </div>
                 <div className="mt-2">
                   <input
