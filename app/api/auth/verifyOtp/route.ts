@@ -1,7 +1,6 @@
 import USER from "@/app/models/userSchema";
 import connectDb from "@/app/util/connectDb";
 import { NextRequest, NextResponse } from "next/server";
-import jsonwebtoken from 'jsonwebtoken';
 import { checkValidityOfToken } from "@/app/util/checkValidityOfToken";
 export async function PUT(req:NextRequest){
     try{
