@@ -6,7 +6,52 @@ import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 export default function Page() {
   const router=useRouter()
- 
+  const [email,setEmail]=useState('')
+  const [otp,setOtp]=useState('')
+  const [password,setPassword]=useState('')
+  const [confirmPassword,setConfirmPassword]=useState('')
+async function sendMail(){
+const response=await fetch('/api/auth/passwordResetMail',{
+    method:'PUT',
+    headers:{
+        'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+        email
+    })
+})
+const data=await response.json()
+if(data.success){
+    toast.success(data.message)
+}
+else{
+    toast.error(data.message)
+}
+ }
+async function updatePassword(){
+const response=await fetch('/api/auth/resetPassword',{
+    method:'PUT',
+    headers:{
+        'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+        email,
+        otp:Number(otp),
+        password:password
+    })
+})
+const data=await response.json()
+if(data.success){
+    toast.success(data.message)
+    router.push('/login')
+}
+else if(data.error){
+    toast.error(data.error.issues.map((issue)=>issue.message).join(' '))
+}
+else{
+    toast.error(data.message)
+}
+}
   return (
     <section>
       <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
@@ -18,7 +63,14 @@ export default function Page() {
            Forgot Password
           </h2>
           
-          <form className="mt-8">
+          <form className="mt-8" onSubmit={(e)=>{
+            e.preventDefault()
+            if(confirmPassword!==password){
+                toast.error('Confirm Password and password should match!')
+                return
+            }
+            updatePassword()
+          }}>
             <div className="space-y-5">
               <div>
                 <label htmlFor="" className="text-base font-medium text-white">
@@ -30,10 +82,14 @@ export default function Page() {
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                     type="email"
                     placeholder="Email"
+                    value={email}
+                    onChange={(e)=>{
+                        setEmail(e.target.value)
+                    }}
                     
                   ></input>
                 </div>
-                <button type='button' className='bg-white text-black px-4 py-2 rounded-md mt-4'>Send Email</button>
+                <button type='button' className='bg-white text-black px-4 py-2 rounded-md mt-4' onClick={()=>sendMail()}>Send Email</button>
               </div>
               <div>
                 <div className="flex items-center justify-between">
@@ -48,7 +104,8 @@ export default function Page() {
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                     type="text"
                     placeholder="Enter the OTP"
-                    
+                    value={otp}
+                    onChange={(e)=>setOtp(e.target.value)}
                   ></input>
                 </div>
               </div>
@@ -65,7 +122,8 @@ export default function Page() {
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                     type="password"
                     placeholder="Password"
-                    
+                    value={password}
+                    onChange={(e)=>setPassword(e.target.value)}
                   ></input>
                 </div>
               </div>
@@ -82,7 +140,8 @@ export default function Page() {
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                     type="password"
                     placeholder="Confirm Password"
-                    
+                    value={confirmPassword}
+                    onChange={(e)=>setConfirmPassword(e.target.value)}
                   ></input>
                 </div>
               </div>
