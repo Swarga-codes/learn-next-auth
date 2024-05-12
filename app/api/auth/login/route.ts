@@ -13,7 +13,7 @@ try {
     const isPasswordMatching=await bcrypt.compare(password,existingUser.password)
     if(!isPasswordMatching) return NextResponse.json({success:false,message:'Passwords do not match'},{status:403})
         if(!existingUser.isVerified) return NextResponse.json({success:false,message:'User is not verified, please verify to login!'},{status:403})
-    const token=await jsonwebtoken.sign({email,username:existingUser.username},process.env.SECRET_KEY)
+    const token=await jsonwebtoken.sign({email,username:existingUser.username},process.env.SECRET_KEY,{expiresIn:'1h'})
     const response=NextResponse.json({success:true,message:'Logged in successfully!',email,username:existingUser.username},{status:200})
     response.cookies.set('token',token)
     return response

@@ -2,18 +2,13 @@ import USER from "@/app/models/userSchema";
 import connectDb from "@/app/util/connectDb";
 import { NextRequest, NextResponse } from "next/server";
 import jsonwebtoken from 'jsonwebtoken';
+import { checkValidityOfToken } from "@/app/util/checkValidityOfToken";
 export async function PUT(req:NextRequest){
     try{
-const token=req.cookies.get('token')?.value || ""
-if(!token) return NextResponse.json({success:false,message:'Unauthorized, please register to regenerate otp!'},{status:403})
-    
-const decodedToken=await jsonwebtoken.verify(
-    token,process.env.SECRET_KEY
-)
-
+const decodedToken=checkValidityOfToken(req)
+if(!decodedToken.success) return NextResponse.json(decodedToken,{status:401})
 const email=decodedToken?.email
 const {otp}=await req.json()
-
 await connectDb();
 if(!otp || !email) return NextResponse.json({success:false,message:'One or more fields are missing!'},{status:422})
 const existingUser=await USER.findOne({email:email})
