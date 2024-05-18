@@ -10,6 +10,7 @@ export default function Page() {
   const [otp,setOtp]=useState('')
   const [password,setPassword]=useState('')
   const [confirmPassword,setConfirmPassword]=useState('')
+  const [isLoading,setIsLoading]=useState(false)
 async function sendMail(){
 const response=await fetch('/api/auth/passwordResetMail',{
     method:'PUT',
@@ -65,11 +66,13 @@ else{
           
           <form className="mt-8" onSubmit={(e)=>{
             e.preventDefault()
+            setIsLoading(true)
             if(confirmPassword!==password){
                 toast.error('Confirm Password and password should match!')
                 return
             }
             updatePassword()
+            setIsLoading(false)
           }}>
             <div className="space-y-5">
               <div>
@@ -146,12 +149,22 @@ else{
                 </div>
               </div>
               <div>
+              {!isLoading?
                 <button
                   type="submit"
                   className="inline-flex w-full items-center justify-center rounded-md bg-white px-3.5 py-2.5 font-semibold leading-7 text-black"
                 >
                   Verify Otp <ArrowRight className="ml-2" size={16} />
                 </button>
+                
+            :
+            <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-md bg-white px-3.5 py-2.5 font-semibold leading-7 text-black"
+          >
+           Verifying... <ArrowRight className="ml-2" size={16} />
+          </button>
+            }
                 
     
               </div>
