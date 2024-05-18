@@ -13,7 +13,7 @@ export async function PUT(req:NextRequest){
     if(isExistingUser.verifyOtp!==otp) return NextResponse.json({success:false,message:'OTP do not match!'},{status:403})
     const currentTime:Date=new Date()
     const expiryTime:Date=new Date(isExistingUser.verifyOtpExpiry)
-    const timeDifference:number=Math.ceil((currentTime-expiryTime)/(1000*60*60))
+    const timeDifference:number=Math.ceil((currentTime.getTime()-expiryTime.getTime())/(1000*60*60))
     if(timeDifference>1) return NextResponse.json({success:false,message:'Otp has expired please resend mail again to generate another OTP!'},{status:403})
         const passwordRegex=/^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$%^&+=!])(?!.*\s).{8,}$/
     const mySchema=z.object({
