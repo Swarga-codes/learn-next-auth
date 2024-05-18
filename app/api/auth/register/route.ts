@@ -36,7 +36,7 @@ can use this username
  
 */
 const existingUserName=await USER.findOne({username:username})
-if(existingUserName.email!==email && existingUserName.isVerified) return NextResponse.json({success:false, message:'An existing verified user with the same username exists'},{status:409})
+if(existingUserName && existingUserName?.username!==username && existingUserName.isVerified) return NextResponse.json({success:false, message:'An existing verified user with the same username exists'},{status:409})
 const isExistingUser= await USER.findOne({email})
 const hashPassword=await bcrypt.hash(password,10);
 const verifyOtp=Math.floor(100000+Math.random()*900000);
@@ -74,7 +74,7 @@ if(isExistingUser){
 const newUser=new USER({
     username,
     email,
-    password,
+    password:hashPassword,
     verifyOtp,
     verifyOtpExpiry:new Date(Date.now()+36000000),
 })
