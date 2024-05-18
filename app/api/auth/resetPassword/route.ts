@@ -17,11 +17,11 @@ export async function PUT(req:NextRequest){
     if(timeDifference>1) return NextResponse.json({success:false,message:'Otp has expired please resend mail again to generate another OTP!'},{status:403})
         const passwordRegex=/^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$%^&+=!])(?!.*\s).{8,}$/
     const mySchema=z.object({
-        password:z.string().min(8,{success:false,message:'Must be atleast 8 characters long!'}).regex(passwordRegex,{success:false,message:'Password should have atleast one lowercase, uppercase, number and special characters!'})
+        password:z.string().min(8,{message:'Must be atleast 8 characters long!'}).regex(passwordRegex,{message:'Password should have atleast one lowercase, uppercase, number and special characters!'})
     })
     const validation=mySchema.safeParse({password})
     if(!validation.success){
-    return NextResponse.json(validation,{status:422})
+    return NextResponse.json({success:false,validation},{status:422})
     }
     const isExistingPassword=await bcrypt.compare(password,isExistingUser.password)
     if(isExistingPassword) return NextResponse.json({success:false,message:'New password cannot be same as current password!'},{status:409})
