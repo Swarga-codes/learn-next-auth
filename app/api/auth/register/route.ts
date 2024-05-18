@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from 'bcrypt';
 import { transporter } from "@/app/util/sendEmailConfig";
-import { EmailTemplate } from "@/app/Components/EmailTemplate";
 import jsonwebtoken from 'jsonwebtoken';
 
 export async function POST(req:NextRequest){

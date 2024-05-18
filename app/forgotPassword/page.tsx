@@ -47,7 +47,7 @@ if(data.success){
     router.push('/login')
 }
 else if(data.error){
-    toast.error(data.error.issues.map((issue)=>issue.message).join(' '))
+    toast.error(data.error.issues.map((issue:any)=>issue.message).join(' '))
 }
 else{
     toast.error(data.message)
